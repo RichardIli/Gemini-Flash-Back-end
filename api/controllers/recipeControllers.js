@@ -25,10 +25,32 @@ exports.generateRecipe = async (req, res) => {
     try {
         const foodCategory = category ?? 'food or meal';
 
+        // the bloc should fetch this "foodCategory","name", "preparationTime", "difficulty" and "process" from a repository
+
         const prompt = `I want to make a ${foodCategory} using these ingredients that I have. ${ingredients}\n
         I want a multiple options.
         Please add some common ingredients that can be easy to acquire.\n
-        Give it the preparation level from easy, medium or hard level based on preparation and the ingredients.`;
+        Give it the preparation level from easy, medium or hard level based on preparation and the ingredients.
+        the ouput that I want is a JSON object with the following: "foodCategory", "foodName", "ingredients", "preparationTime", "difficulty" and "process".
+        [
+            {
+                "foodCategory": "Food category",
+                "foodName": "Recipe Name",
+                "ingredients": ["ingredient1", "ingredient2", ...],
+                "preparationTime": "30 minutes",
+                "difficulty": "easy",
+                "process": "Step 1: ..., Step 2: ..."
+            },
+            {
+                "foodCategory": "Food category",
+                "foodName": "Recipe Name",
+                "ingredients": ["ingredient1", "ingredient2", ...],
+                "preparationTime": "30 minutes",
+                "difficulty": "easy",
+                "process": "Step 1: ..., Step 2: ..."
+            },
+            and so on...
+        ]`;
 
         const model = genAI.getGenerativeModel({
             model: 'gemini-1.5-flash',
