@@ -9,6 +9,26 @@ if (!api_Key) {
 }
 const genAI = new GoogleGenerativeAI(api_Key);
 
+exampleOutput = `[
+            {
+                "foodCategory": "Food category (e.g., salad, soup, main course)",
+                "foodName": "Recipe Name",
+                "ingredients": ["ingredient1", "ingredient2", ...],
+                "preparationTime": "30 minutes",
+                "difficulty": "easy",
+                "process": "Step 1: ..., Step 2: ..."
+            },
+            {
+                "foodCategory": "Food category (e.g., salad, soup, main course)",
+                "foodName": "Recipe Name",
+                "ingredients": ["ingredient1", "ingredient2", ...],
+                "preparationTime": "30 minutes",
+                "difficulty": "easy",
+                "process": "Step 1: ..., Step 2: ..."
+            },
+            and so on...
+        ]`;
+
 /**
  * Controller function to generate a recipe based on ingredients.
  * @param {express.Request} req The Express request object.
@@ -28,29 +48,11 @@ exports.generateRecipe = async (req, res) => {
         // the bloc should fetch this "foodCategory","name", "preparationTime", "difficulty" and "process" from a repository
 
         const prompt = `I want to make a ${foodCategory} using these ingredients that I have. ${ingredients}\n
-        I want a multiple options.
+        I want a multiple options.\n
         Please add some common ingredients that can be easy to acquire.\n
-        Give it the preparation level from easy, medium or hard level based on preparation and the ingredients.
-        the ouput that I want is a JSON object with the following: "foodCategory", "foodName", "ingredients", "preparationTime", "difficulty" and "process".
-        [
-            {
-                "foodCategory": "Food category",
-                "foodName": "Recipe Name",
-                "ingredients": ["ingredient1", "ingredient2", ...],
-                "preparationTime": "30 minutes",
-                "difficulty": "easy",
-                "process": "Step 1: ..., Step 2: ..."
-            },
-            {
-                "foodCategory": "Food category",
-                "foodName": "Recipe Name",
-                "ingredients": ["ingredient1", "ingredient2", ...],
-                "preparationTime": "30 minutes",
-                "difficulty": "easy",
-                "process": "Step 1: ..., Step 2: ..."
-            },
-            and so on...
-        ]`;
+        Give it the preparation level from easy, medium or hard level based on preparation and the ingredients.\n
+        the ouput that I want is a JSON object with the following: "foodCategory", "foodName", "ingredients", "preparationTime", "difficulty" and "process".\n
+        ${exampleOutput}`;
 
         const model = genAI.getGenerativeModel({
             model: 'gemini-1.5-flash',
@@ -78,33 +80,15 @@ exports.generateDailyRecipe = async (req, res) => {
 
 
     try {
-        const foodCategory =  'food or meal';
+        const foodCategory = 'food or meal';
 
         // the bloc should fetch this "foodCategory","name", "preparationTime", "difficulty" and "process" from a repository
 
         const prompt = `I want to make a ${foodCategory}.\n
-        I want a multiple options at least 5.
-        Give it the preparation level from easy, medium or hard level based on preparation and the ingredients.
-        the ouput that I want is a JSON object with the following: "foodCategory", "foodName", "ingredients", "preparationTime", "difficulty" and "process".
-        [
-            {
-                "foodCategory": "Food category",
-                "foodName": "Recipe Name",
-                "ingredients": ["ingredient1", "ingredient2", ...],
-                "preparationTime": "30 minutes",
-                "difficulty": "easy",
-                "process": "Step 1: ..., Step 2: ..."
-            },
-            {
-                "foodCategory": "Food category",
-                "foodName": "Recipe Name",
-                "ingredients": ["ingredient1", "ingredient2", ...],
-                "preparationTime": "30 minutes",
-                "difficulty": "easy",
-                "process": "Step 1: ..., Step 2: ..."
-            },
-            and so on...
-        ]`;
+        I want a multiple options at least 5.\n
+        Give it the preparation level from easy, medium or hard level based on preparation and the ingredients.\n
+        the ouput that I want is a JSON object with the following: "foodCategory", "foodName", "ingredients", "preparationTime", "difficulty" and "process".\n
+        ${exampleOutput}`;
 
         const model = genAI.getGenerativeModel({
             model: 'gemini-1.5-flash',
