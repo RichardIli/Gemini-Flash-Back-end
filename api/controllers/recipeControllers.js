@@ -1,7 +1,6 @@
 // controllers/recipeController.js
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-// Initialize the Gemini API client
 const api_Key = process.env.API_KEY;
 if (!api_Key) {
     console.error('API_KEY is not defined in environment variables.');
@@ -9,105 +8,102 @@ if (!api_Key) {
 }
 const genAI = new GoogleGenerativeAI(api_Key);
 
-exampleOutput = `[
-            {
-                "foodCategory": "Food category (e.g., salad, soup, main course)",
-                "foodName": "Recipe Name",
-                "ingredients": ["ingredient1", "ingredient2", ...],
-                "preparationTime": "30 minutes",
-                "difficulty": "easy",
-                "process": "Step 1: ..., Step 2: ..."
-            },
-            {
-                "foodCategory": "Food category (e.g., salad, soup, main course)",
-                "foodName": "Recipe Name",
-                "ingredients": ["ingredient1", "ingredient2", ...],
-                "preparationTime": "30 minutes",
-                "difficulty": "easy",
-                "process": "Step 1: ..., Step 2: ..."
-            },
-            and so on...
-        ]`;
+const exampleOutput = `[
+    {
+        "foodCategory": "Food category (e.g., salad, soup, main course)",
+        "foodName": "Recipe Name",
+        "ingredients": ["ingredient1", "ingredient2", "..."],
+        "preparationTime": "30 minutes",
+        "difficulty": "easy",
+        "process": "Step 1: ..., Step 2: ..."
+    }
+    // ...more recipes
+]`;
 
-/**
- * Controller function to generate a recipe based on ingredients.
- * @param {express.Request} req The Express request object.
- * @param {express.Response} res The Express response object.
- */
+// Helper to call Gemini API and parse JSON
+async function getRecipesFromGemini(prompt) {
+    const model = genAI.getGenerativeModel({
+        model: 'gemini-1.5-flash',
+        generationConfig: { responseMimeType: "application/json" },
+    });
+    const result = await model.generateContent(prompt);
+    const responseText = result.response.text();
+    try {
+        return JSON.parse(responseText);
+    } catch (err) {
+        throw new SyntaxError('Failed to parse Gemini JSON response: ' + err.message);
+    }
+}
+
 exports.generateRecipe = async (req, res) => {
     const { ingredients, category } = req.body;
-
-    // Basic validation
     if (!ingredients) {
         return res.status(400).json({ error: 'Ingredients are required in the request body.' });
     }
-
-    try {
-        const foodCategory = category ?? 'food or meal';
-
-        // the bloc should fetch this "foodCategory","name", "preparationTime", "difficulty" and "process" from a repository
-
-        const prompt = `I want to make a ${foodCategory} using these ingredients that I have. ${ingredients}\n
-        I want a multiple options.\n
-        Please add some common ingredients that can be easy to acquire.\n
-        Give it the preparation level from easy, medium or hard level based on preparation and the ingredients.\n
-        the ouput that I want is a JSON object with the following: "foodCategory", "foodName", "ingredients", "preparationTime", "difficulty" and "process".\n
+    const foodCategory = category ?? 'food or meal';
+    const prompt = `I want to make a ${foodCategory} using these ingredients: ${ingredients}.
+        I want multiple options. Please add some common, easy-to-acquire ingredients.
+        Rate preparation as easy, medium, or hard.
+        Output JSON: "foodCategory", "foodName", "ingredients", "preparationTime", "difficulty", "process".
         ${exampleOutput}`;
-
-        const model = genAI.getGenerativeModel({
-            model: 'gemini-1.5-flash',
-            generationConfig: {
-                responseMimeType: "application/json",
-            },
-        });
-
-        const result = await model.generateContent(prompt);
-        const responseText = result.response.text();
-        const parsedJson = JSON.parse(responseText);
-
-        res.status(200).json(parsedJson);
-
+    try {
+        const recipes = await getRecipesFromGemini(prompt);
+        res.status(200).json(recipes);
     } catch (error) {
         console.error('Gemini API or JSON parsing error:', error);
-        if (error instanceof SyntaxError) {
-            return res.status(500).json({ error: 'Failed to parse JSON response from Gemini. It may have returned a non-JSON output.', details: error.message });
-        }
-        res.status(500).json({ error: 'Internal server error occurred.', details: error.message });
+        res.status(500).json({ error: error.message });
     }
 };
 
 exports.generateDailyRecipe = async (req, res) => {
-
-
-    try {
-        const foodCategory = 'food or meal';
-
-        // the bloc should fetch this "foodCategory","name", "preparationTime", "difficulty" and "process" from a repository
-
-        const prompt = `I want to make a ${foodCategory}.\n
-        I want a multiple options at least 5.\n
-        Give it the preparation level from easy, medium or hard level based on preparation and the ingredients.\n
-        the ouput that I want is a JSON object with the following: "foodCategory", "foodName", "ingredients", "preparationTime", "difficulty" and "process".\n
+    const prompt = `I want to make a food or meal.
+        Give at least 5 options.
+        Rate preparation as easy, medium, or hard.
+        Output JSON: "foodCategory", "foodName", "ingredients", "preparationTime", "difficulty", "process".
         ${exampleOutput}`;
-
-        const model = genAI.getGenerativeModel({
-            model: 'gemini-1.5-flash',
-            generationConfig: {
-                responseMimeType: "application/json",
-            },
-        });
-
-        const result = await model.generateContent(prompt);
-        const responseText = result.response.text();
-        const parsedJson = JSON.parse(responseText);
-
-        res.status(200).json(parsedJson);
-
+    try {
+        const recipes = await getRecipesFromGemini(prompt);
+        res.status(200).json(recipes);
     } catch (error) {
         console.error('Gemini API or JSON parsing error:', error);
-        if (error instanceof SyntaxError) {
-            return res.status(500).json({ error: 'Failed to parse JSON response from Gemini. It may have returned a non-JSON output.', details: error.message });
-        }
-        res.status(500).json({ error: 'Internal server error occurred.', details: error.message });
+        res.status(500).json({ error: error.message });
+    }
+};
+
+exports.generateRecipeByCategory = async (req, res) => {
+    const { foodCategory } = req.body;
+    if (!foodCategory) {
+        return res.status(400).json({ error: 'Category is required in the request body.' });
+    }
+    const prompt = `I want to make a ${foodCategory}.
+        Give at least 5 options.
+        Rate preparation as easy, medium, or hard.
+        Output JSON: "foodCategory", "foodName", "ingredients", "preparationTime", "difficulty", "process".
+        ${exampleOutput}`;
+    try {
+        const recipes = await getRecipesFromGemini(prompt);
+        res.status(200).json(recipes);
+    } catch (error) {
+        console.error('Gemini API or JSON parsing error:', error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+exports.generateRecipeOfThisFood = async (req, res) => {
+    const { foodName } = req.body;
+    if (!foodName) {
+        return res.status(400).json({ error: 'foodName is required in the request body.' });
+    }
+    const prompt = `I want to make a ${foodName}.
+        Give at least 5 options for how to cook it.
+        Rate preparation as easy, medium, or hard.
+        Output JSON: "foodCategory", "foodName", "ingredients", "preparationTime", "difficulty", "process".
+        ${exampleOutput}`;
+    try {
+        const recipes = await getRecipesFromGemini(prompt);
+        res.status(200).json(recipes);
+    } catch (error) {
+        console.error('Gemini API or JSON parsing error:', error);
+        res.status(500).json({ error: error.message });
     }
 };
