@@ -7,6 +7,7 @@ if (!api_Key) {
     process.exit(1);
 }
 const genAI = new GoogleGenerativeAI(api_Key);
+const modelName = 'gemini-2.5-flash';
 
 const exampleOutput = `[
     {
@@ -23,7 +24,7 @@ const exampleOutput = `[
 // Helper to call Gemini API and parse JSON
 async function getRecipesFromGemini(prompt) {
     const model = genAI.getGenerativeModel({
-        model: 'gemini-1.5-flash',
+        model: modelName,
         generationConfig: { responseMimeType: "application/json" },
     });
     const result = await model.generateContent(prompt);
