@@ -16,7 +16,7 @@ const exampleOutput = `[
         "ingredients": ["ingredient1", "ingredient2", "..."],
         "preparationTime": "30 minutes",
         "difficulty": "easy",
-        "process": "Step 1: ..., Step 2: ..."
+        "process": "Step 1: ...\n Step 2: ..."
     }
     // ...more recipes
 ]`;
