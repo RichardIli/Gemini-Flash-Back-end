@@ -1,13 +1,5 @@
 // controllers/recipeController.js
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-
-const api_Key = process.env.API_KEY;
-if (!api_Key) {
-    console.error('API_KEY is not defined in environment variables.');
-    process.exit(1);
-}
-const genAI = new GoogleGenerativeAI(api_Key);
-const modelName = 'gemini-2.5-flash';
+const { model } = require('../config/gemini.js');
 
 const exampleOutput = `[
     {
@@ -23,10 +15,6 @@ const exampleOutput = `[
 
 // Helper to call Gemini API and parse JSON
 async function getRecipesFromGemini(prompt) {
-    const model = genAI.getGenerativeModel({
-        model: modelName,
-        generationConfig: { responseMimeType: "application/json" },
-    });
     const result = await model.generateContent(prompt);
     const responseText = result.response.text();
     try {

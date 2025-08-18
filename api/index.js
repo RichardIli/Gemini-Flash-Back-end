@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 require('dotenv').config();
-const recipeRoutes = require('./routes/recipeRoutes.js');
+const routes = require('./routes/routes.js');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -13,7 +13,7 @@ app.use(cors()); // Enable CORS for all routes
 app.use(bodyParser.json());
 
 // Routes
-app.use('/api', recipeRoutes);
+app.use('/api', routes);
 
 // Basic error handling for undefined routes
 app.use((req, res, next) => {
@@ -25,6 +25,7 @@ app.use((err, req, res, next) => {
     console.error('Server error:', err);
     res.status(500).json({ error: 'Internal server error occurred.' });
 });
+
 
 // Start the server
 app.listen(port, () => {
