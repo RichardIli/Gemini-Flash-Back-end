@@ -22,7 +22,7 @@ const exampleOutput = `[
          uploadDate: <date>,
          uploader: <uploader name>,
          currentBid: <current bid amount>,
-         biddingEnd: <date, make sure that its random whith combination of past and the future date>
+         biddingEnd: <random date in the range of 1-7 days before and after ${new Date()}>,
     },
     // ...more recipes
 ]`;
