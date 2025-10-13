@@ -1,5 +1,5 @@
 // controllers/recipeController.js
-const { model } = require('../config/gemini.js');
+const model = require('../config/gemini.js');
 
 const exampleOutput = `[
     {
