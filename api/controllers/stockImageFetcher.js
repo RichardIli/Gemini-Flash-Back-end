@@ -1,7 +1,5 @@
 // stockImageFetcher.js
 
-const fetch = require('node-fetch').default; // Ensure node-fetch is required
-
 exports.retreiveImage = async (req, res) => {
     try {
         const { itemName } = req.body;
@@ -13,25 +11,24 @@ exports.retreiveImage = async (req, res) => {
         if (!pixabay_Api_Key) {
             return res.status(500).json({ error: 'PIXABAY_API_KEY is not defined in environment variables.' });
         }
-        // Placeholder logic for fetching images based on item names
-        const apiURLBase = 'https://pixabay.com/api/';
-        const apiUrl = `${apiURLBase}?key=${pixabay_Api_Key}&q=` + encodeURIComponent(itemName) + '&image_type=photo&per_page=3';
 
-        // Await the fetch and process the response
+        const apiURLBase = 'https://pixabay.com/api/';
+        const apiUrl = `${apiURLBase}?key=${pixabay_Api_Key}&q=${encodeURIComponent(itemName)}&image_type=photo&per_page=3`;
+
+        // Use native fetch (no import needed in Node 18+)
         const response = await fetch(apiUrl);
 
         if (!response.ok) {
-            // console.error(`Pixabay API error: ${response.status} ${response.statusText}`);
-            return res.status(response.status).json({ error: `Pixabay API error: ${response.status} ${response.statusText}` });
+            return res.status(response.status).json({
+                error: `Pixabay API error: ${response.status} ${response.statusText}`
+            });
         }
 
         const data = await response.json();
-        // console.log('Data received:', data);
-        res.status(200).json(data); // Send the data back to the client
-
+        res.status(200).json(data);
 
     } catch (error) {
-        // console.error('Error fetching stock images:', error);
+        console.error('Error fetching stock images:', error);
         res.status(500).json({ error: 'Internal server error.' });
     }
 };
