@@ -1,5 +1,5 @@
 // controllers/recipeController.js
-const model = require('../config/gemini.js');
+const { model, imageGenerationModel } = require('../config/gemini.js');
 
 const exampleOutput = `[
     {
@@ -13,7 +13,7 @@ const exampleOutput = `[
     // ...more recipes
 ]`;
 
-// Helper to call Gemini API and parse JSON
+// Helper to call Gemini API and parse JSON for generating recipes
 async function getRecipesFromGemini(prompt) {
     const result = await model.generateContent(prompt);
     const responseText = result.response.text();
@@ -23,6 +23,19 @@ async function getRecipesFromGemini(prompt) {
         throw new SyntaxError('Failed to parse Gemini JSON response: ' + err.message);
     }
 }
+
+// This part is currently not in use because the image generation model is not available
+// Helper to call Gemini API and parse JSON for generating itemImage
+// async function generateItemImageFromGemini(prompt) {
+//     const result = await imageGenerationModel.generateContent(prompt);
+//     const responseText = result.response.text();
+//     try {
+//         return JSON.parse(responseText);
+//     } catch (err) {
+//         throw new SyntaxError('Failed to parse Gemini JSON response: ' + err.message);
+//     }
+// }
+
 
 exports.generateRecipe = async (req, res) => {
     const { ingredients, category } = req.body;
@@ -96,3 +109,26 @@ exports.generateRecipeOfThisFood = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+// this part is currently not in use because the image generation model is not available
+// exports.generateRecipeItemImage = async (req, res) => {
+//     const { foodName, ingredients } = req.body;
+//     if (!foodName || !ingredients) {
+//         return res.status(400).json({ error: 'foodName and ingredients are required in the request body.' });
+//     }
+//     const prompt = `Generate an image of ${foodName} with the following ingredients: ${ingredients}.
+//         Output JSON: "itemName", "itemImage".
+//         exampleOutput:
+//         {
+//             "itemName": "Food Name", // the name of the foodName that was passed in the prompt
+//             "itemImage": "<base64 encoded image data>"
+//         }`;
+//     try {
+//         const generatedImage = await generateItemImageFromGemini(prompt);
+//         res.status(200).json(generatedImage);
+//     } catch (error) {
+//         console.error('Gemini API or JSON parsing error:', error);
+//         res.status(500).json({ error: error.message });
+//     }
+// }
+
